@@ -1,5 +1,5 @@
 # fastly-api-java
-Java API Wrapper for Fastly
+Java API Wrapper for Fastly (https://docs.fastly.com/api)
 
 # Run tests
 
