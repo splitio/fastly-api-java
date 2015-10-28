@@ -1,19 +1,23 @@
-package io.split;
+package io.split.fastly.client;
 
 import com.google.common.collect.ImmutableMap;
-import com.ning.http.client.*;
-import org.jboss.netty.handler.codec.http.HttpMethod;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import com.ning.http.client.FluentStringsMap;
+import com.ning.http.client.Response;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import static io.split.fastly.client.FastlyApiClient.Method.POST;
+import static io.split.fastly.client.FastlyApiClient.Method.PURGE;
+import static io.split.fastly.client.FastlyApiClient.Method.PUT;
 import static java.util.stream.Collectors.toList;
-import static org.jboss.netty.handler.codec.http.HttpMethod.POST;
-import static org.jboss.netty.handler.codec.http.HttpMethod.PUT;
-import static org.jboss.netty.handler.codec.http.HttpMethod.DELETE;
-import static org.jboss.netty.handler.codec.http.HttpMethod.GET;
+
+
 
 /**
  * Wrapper client for http://docs.fastly.com/api
@@ -29,10 +33,14 @@ public class FastlyApiClient {
     private final String _serviceId;
     private final String _apiKey;
 
-    public FastlyApiClient(final String apiKey, final String serviceId,
-                           AsyncHttpClientConfig config /*, proxyServer:Option[ProxyServer]=None*/) {
 
-        _commonHeaders = ImmutableMap.of("X-Fastly-Key", apiKey, "Accept", "application/json");
+    public FastlyApiClient(final String apiKey, final String serviceId) {
+        this(apiKey, serviceId, null);
+    }
+
+    public FastlyApiClient(final String apiKey, final String serviceId, AsyncHttpClientConfig config) {
+
+        _commonHeaders = ImmutableMap.of("Fastly-Key", apiKey, "Accept", "application/json");
         _config = config;
         _apiKey = apiKey;
         _serviceId = serviceId;
@@ -61,26 +69,25 @@ public class FastlyApiClient {
         return responses;
     }
 
-    public Future<Response> purge(final String url, Map<String, String> extraHeaders) {
-        String urlWithoutPrefix = url.replaceFirst("^(http://|https://)","");
-        String apiUrl = String.format("%s/purge/%s", FASTLY_URL, urlWithoutPrefix);
+    public Future<Response> purgeUrl(final String url) {
+        return purgeUrl(url, Collections.EMPTY_MAP);
+    }
+
+    public Future<Response> softPurgeUrl(final String url) {
+        return softPurgeUrl(url, Collections.EMPTY_MAP);
+    }
+
+    public Future<Response> softPurgeUrl(final String url, Map<String, String> extraHeaders) {
+        return purgeUrl(url, buildHeaderForSoftPurge(extraHeaders));
+    }
+
+    public Future<Response> purgeUrl(final String url, Map<String, String> extraHeaders) {
+
         return _asyncHttpExecutor.execute(
-                apiUrl,
-                POST,
-                ImmutableMap.<String, String> builder().putAll(_commonHeaders).putAll(extraHeaders).build(),
+                url,
+                PURGE,
+                ImmutableMap.<String, String>builder().putAll(_commonHeaders).putAll(extraHeaders).build(),
                 Collections.EMPTY_MAP);
-    }
-
-    public Future<Response> purge(final String url) {
-        return purge(url, Collections.EMPTY_MAP);
-    }
-
-    public Future<Response> softPurge(final String url, Map<String, String> extraHeaders) {
-        return purge(url, buildHeaderForSoftPurge(extraHeaders));
-    }
-
-    public Future<Response> softPurge(final String url) {
-        return softPurge(url, Collections.EMPTY_MAP);
     }
 
     public Future<Response> purgeKey(String key, Map<String, String> extraHeaders) {
@@ -88,7 +95,7 @@ public class FastlyApiClient {
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
-                ImmutableMap.<String, String> builder().put("X-Fastly-Key", _apiKey).putAll(extraHeaders).build(),
+                ImmutableMap.<String, String> builder().put("Fastly-Key", _apiKey).putAll(extraHeaders).build(),
                 Collections.EMPTY_MAP);
     }
 
@@ -123,14 +130,34 @@ public class FastlyApiClient {
     }
 
     /**
+     * Supports PURGE operations.
+     */
+    static class ExtendedAsyncHttpClient extends AsyncHttpClient {
+
+        public ExtendedAsyncHttpClient(AsyncHttpClientConfig config) {
+            super(config);
+        }
+
+        /**
+         * Prepare an HTTP client PURGE request.
+         *
+         * @param url A well formed URL.
+         * @return {@link BoundRequestBuilder}
+         */
+        public BoundRequestBuilder preparePurge(String url) {
+            return requestBuilder("PURGE", url);
+        }
+    }
+
+    /**
      * Entity Responsible for executing the requesting against the remote endpoint.
      */
     private class AsyncHttpExecutor {
 
-        private AsyncHttpClient client;
+        private ExtendedAsyncHttpClient client;
 
         public AsyncHttpExecutor() {
-            client = _config != null ? new AsyncHttpClient(_config) : new AsyncHttpClient(defaultConfig);
+            client = _config != null ? new ExtendedAsyncHttpClient(_config) : new ExtendedAsyncHttpClient(defaultConfig);
         }
 
         private AsyncHttpClientConfig defaultConfig = new AsyncHttpClientConfig.Builder()
@@ -145,7 +172,7 @@ public class FastlyApiClient {
         }
 
         public Future<Response> execute( String apiUrl,
-                        HttpMethod method,
+                        Method method,
                         Map<String, String> headers,
                         Map<String, String> parameters) {
 
@@ -159,22 +186,28 @@ public class FastlyApiClient {
 
         }
 
-        private AsyncHttpClient.BoundRequestBuilder getRequestForMethod(String apiURL, HttpMethod method) {
-            if (method.equals(POST)) {
+        private AsyncHttpClient.BoundRequestBuilder getRequestForMethod(String apiURL, Method method) {
+
+            if (method == Method.PURGE) {
+                return client.preparePurge(apiURL);
+            }
+
+            if (method == Method.POST) {
                 return client.preparePost(apiURL);
             }
 
-            if (method.equals(PUT)) {
-                return client.preparePost(apiURL);
+            if (method == Method.PUT) {
+                return client.preparePut(apiURL);
             }
 
-            if (method.equals(DELETE)) {
-                return client.preparePost(apiURL);
+            if (method == Method.DELETE) {
+                return client.prepareDelete(apiURL);
             }
 
-            if (method.equals(GET)) {
-                return client.preparePost(apiURL);
+            if (method == Method.GET) {
+                return client.prepareGet(apiURL);
             }
+
             return null;
         }
 
@@ -199,6 +232,16 @@ public class FastlyApiClient {
                 request.setVirtualHost(host);
             }
         }
+
+    }
+
+    static enum Method {
+
+        POST,
+        PURGE,
+        PUT,
+        GET,
+        DELETE;
 
     }
 
