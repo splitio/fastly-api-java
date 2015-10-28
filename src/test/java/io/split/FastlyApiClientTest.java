@@ -18,7 +18,7 @@ public class FastlyApiClientTest extends BaseFastlyTest {
 
         purgeAll(client);
 
-        Future<Response> future = client.softPurgeKey("1446063663010");
+        Future<Response> future = client.softPurgeKey("1446068332476");
         Response res = future.get();
 
         printResult(res);
