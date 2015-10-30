@@ -1,6 +1,17 @@
 # fastly-api-java
 Java API Wrapper for Fastly (https://docs.fastly.com/api)
 
+# Add snapshot repo to your maven pom.xml
+
+```xml
+<repositories>
+    <repository>
+      <id>sonatype snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+    .....
+```
+
 # Run tests
 
 Create a file under src/test/resources called: keys.properties containing:

@@ -12,13 +12,12 @@ import java.util.concurrent.Future;
 public class FastlyApiClientTest extends BaseFastlyTest {
 
     @Test
-    @Ignore
     public void testPurgeAll() throws ExecutionException, InterruptedException, IOException {
         FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
 
         purgeAll(client);
 
-        Future<Response> future = client.softPurgeKey("1446068332476");
+        Future<Response> future = client.softPurgeKey("1446076111485");
         Response res = future.get();
 
         printResult(res);
