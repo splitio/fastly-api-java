@@ -21,6 +21,11 @@ fastly.api.key=<YOUR_FASTLY_API_KEY>
 fastly.service.id=<YOUR_FASTLY_SERVICE_KEY>
 ```
 
+
+# how to deploy a version of this library?
+
+http://central.sonatype.org/pages/apache-maven.html#performing-a-snapshot-deployment
+
 # Any Issues?
 
 Contact me at pato@split.io
