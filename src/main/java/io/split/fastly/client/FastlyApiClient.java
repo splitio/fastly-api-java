@@ -40,7 +40,7 @@ public class FastlyApiClient {
 
     public FastlyApiClient(final String apiKey, final String serviceId, AsyncHttpClientConfig config) {
 
-        _commonHeaders = ImmutableMap.of("Fastly-Key", apiKey, "Accept", "application/json");
+        _commonHeaders = ImmutableMap.of("Fastly-Key", apiKey, "Accept", "application/json", "User-Agent", "fastly-api-java");
         _config = config;
         _apiKey = apiKey;
         _serviceId = serviceId;
