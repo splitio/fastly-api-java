@@ -1,0 +1,8 @@
+Changelog
+---------
+
+1.1
+ Include client version on each request. Example: `"User-Agent" -> "fastly-api-java-v1.1"`
+
+1.0
+ initial version
