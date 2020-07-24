@@ -47,4 +47,14 @@ public class FastlyApiClientTest extends BaseFastlyTest {
         printResult(res);
     }
 
+    @Test
+    public void testPurgeKey() throws ExecutionException, InterruptedException, IOException {
+        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+
+        Future<Response> future = client.softPurgeKey("a");
+        Response res = future.get();
+
+        printResult(res);
+    }
+
 }

@@ -57,7 +57,10 @@ public class FastlyApiClient {
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
-                ImmutableMap.<String, String> builder().putAll(_commonHeaders).put("Content-Type", "application/x-www-form-urlencoded").build(),
+                ImmutableMap.<String, String> builder()
+                        .putAll(_commonHeaders)
+                        .put("Content-Type", "application/x-www-form-urlencoded")
+                        .build(),
                 ImmutableMap.<String, String> builder().put("content", vcl).put("name", name).put("id", id).build());
     }
 
@@ -67,7 +70,10 @@ public class FastlyApiClient {
             return _asyncHttpExecutor.execute(
                     apiUrl,
                     PUT,
-                    ImmutableMap.<String, String> builder().putAll(_commonHeaders).put("Content-Type", "application/x-www-form-urlencoded").build(),
+                    ImmutableMap.<String, String> builder()
+                            .putAll(_commonHeaders)
+                            .put("Content-Type", "application/x-www-form-urlencoded")
+                            .build(),
                     ImmutableMap.<String, String> builder().put("content", e.getValue()).put("name", e.getKey()).build());
 
             }).collect(toList());
@@ -100,7 +106,10 @@ public class FastlyApiClient {
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
-                ImmutableMap.<String, String> builder().put("Fastly-Key", _apiKey).putAll(extraHeaders).build(),
+                ImmutableMap.<String, String> builder()
+                        .putAll(_commonHeaders)
+                        .putAll(extraHeaders)
+                        .build(),
                 Collections.EMPTY_MAP);
     }
 
@@ -118,7 +127,7 @@ public class FastlyApiClient {
                 apiUrl,
                 POST,
                 ImmutableMap.<String, String> builder()
-                        .put("Fastly-Key", _apiKey)
+                        .putAll(_commonHeaders)
                         .put("Surrogate-Key", SURROGATE_KEY_JOINER.join(keys))
                         .build(),
                 Collections.EMPTY_MAP);
