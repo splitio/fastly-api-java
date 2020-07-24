@@ -114,6 +114,17 @@
       </plugin>
 
     </plugins>
+
+    <filters>
+      <filter>src/main/resources/version.properties</filter>
+    </filters>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
   </build>
 
   <dependencies>
