@@ -4,7 +4,7 @@
 
   <groupId>io.split</groupId>
   <artifactId>fastly-api-java</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>fastly-api-java</name>
@@ -78,6 +78,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <configuration>
+              <source>1.8</source>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -85,7 +88,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -134,6 +137,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

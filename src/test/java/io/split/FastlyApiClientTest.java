@@ -1,8 +1,8 @@
 package io.split;
 
+import com.google.common.collect.Lists;
 import com.ning.http.client.Response;
 import io.split.fastly.client.FastlyApiClient;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,6 +35,16 @@ public class FastlyApiClientTest extends BaseFastlyTest {
         System.out.println(res.getStatusCode());
         System.out.println(res.getStatusText());
         System.out.println(res.getResponseBody());
+    }
+
+    @Test
+    public void testPurgeMultipleKeys() throws ExecutionException, InterruptedException, IOException {
+        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+
+        Future<Response> future = client.softPurgeKeys(Lists.newArrayList("a", "b", "c", "d"));
+        Response res = future.get();
+
+        printResult(res);
     }
 
 }

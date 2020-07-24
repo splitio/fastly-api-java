@@ -1,5 +1,6 @@
 package io.split.fastly.client;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -32,6 +33,7 @@ public class FastlyApiClient {
     private final AsyncHttpExecutor _asyncHttpExecutor;
     private final String _serviceId;
     private final String _apiKey;
+    private final Joiner SURROGATE_KEY_JOINER = Joiner.on(" ");
 
 
     public FastlyApiClient(final String apiKey, final String serviceId) {
@@ -105,6 +107,18 @@ public class FastlyApiClient {
 
     public Future<Response> softPurgeKey(String key, Map<String, String> extraHeaders) {
         return purgeKey(key, buildHeaderForSoftPurge(extraHeaders));
+    }
+
+    public Future<Response> softPurgeKeys(List<String> keys) {
+        String apiUrl = String.format("%s/service/%s/purge", FASTLY_URL, _serviceId);
+        return _asyncHttpExecutor.execute(
+                apiUrl,
+                POST,
+                ImmutableMap.<String, String> builder()
+                        .put("Fastly-Key", _apiKey)
+                        .put("Surrogate-Key", SURROGATE_KEY_JOINER.join(keys))
+                        .build(),
+                Collections.EMPTY_MAP);
     }
 
     public Future<Response> softPurgeKey(String key) {
