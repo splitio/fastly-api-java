@@ -6,8 +6,11 @@ import io.split.fastly.client.FastlyApiClient;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class FastlyApiClientTest extends BaseFastlyTest {
 
@@ -42,6 +45,21 @@ public class FastlyApiClientTest extends BaseFastlyTest {
         FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
 
         Future<Response> future = client.softPurgeKeys(Lists.newArrayList("a", "b", "c", "d"));
+        Response res = future.get();
+
+        printResult(res);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPurgeMoreThan256Keys() throws ExecutionException, InterruptedException, IOException {
+        List<String> keys = new Random().ints(257,0,10000)
+                .boxed()
+                .map(i -> Integer.toString(i))
+                .collect(Collectors.toList());
+
+        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+
+        Future<Response> future = client.softPurgeKeys(keys);
         Response res = future.get();
 
         printResult(res);

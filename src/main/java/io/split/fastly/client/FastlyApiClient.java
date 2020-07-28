@@ -1,6 +1,7 @@
 package io.split.fastly.client;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -122,6 +123,7 @@ public class FastlyApiClient {
     }
 
     public Future<Response> softPurgeKeys(List<String> keys) {
+        Preconditions.checkArgument(keys != null && keys.size() <= 256, "Fastly batches can only receive up to 256 keys");
         String apiUrl = String.format("%s/service/%s/purge", FASTLY_URL, _serviceId);
         return _asyncHttpExecutor.execute(
                 apiUrl,
