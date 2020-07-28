@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+1.2
+ Include softPurgeKeys to allow batch call to purge by multiple surrogate keys.
+ Add precondition check to validate we can only pass up to 256 keys.
+
 1.1
  Include client version on each request. Example: `"User-Agent" -> "fastly-api-java-v1.1"`
 

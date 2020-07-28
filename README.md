@@ -12,6 +12,10 @@ Java API Wrapper for Fastly (https://docs.fastly.com/api)
     .....
 ```
 
+# Build
+
+```export GPG_TTY=$(tty) && mvn clean install```
+
 # Run tests
 
 Create a file under src/test/resources called: keys.properties containing:
