@@ -123,7 +123,9 @@ public class FastlyApiClient {
     }
 
     public Future<Response> softPurgeKeys(List<String> keys) {
-        Preconditions.checkArgument(keys != null && keys.size() <= 256, "Fastly batches can only receive up to 256 keys");
+        Preconditions.checkNotNull(keys, "keys cannot be null!");
+        Preconditions.checkArgument(keys.size() <= 256, "Fastly can't purge batches of more than 256 keys");
+
         String apiUrl = String.format("%s/service/%s/purge", FASTLY_URL, _serviceId);
         return _asyncHttpExecutor.execute(
                 apiUrl,
