@@ -1,24 +1,16 @@
 package io.split.fastly.client;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.ning.http.client.Response;
 import io.split.BaseFastlyTest;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import static org.mockito.Mockito.when;
 
 public class FastlyApiClientTest extends BaseFastlyTest {
 
@@ -82,6 +74,4 @@ public class FastlyApiClientTest extends BaseFastlyTest {
 
         printResult(res);
     }
-
-
 }

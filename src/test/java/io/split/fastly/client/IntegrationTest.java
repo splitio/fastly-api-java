@@ -41,7 +41,6 @@ public class IntegrationTest {
         assert (Objects.isNull(headers.get("Fastly-Soft-Purge")));
     }
 
-
     @Test
     public void testSoftPurgeKeys() {
         final String apikey = "someApikey";
@@ -70,5 +69,4 @@ public class IntegrationTest {
         assert (headers.get("Surrogate-Key").equals(FastlyApiClient.SURROGATE_KEY_JOINER.join(keys)));
         assert (headers.get("Fastly-Soft-Purge").equals("1"));
     }
-
 }

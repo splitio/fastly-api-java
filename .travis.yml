@@ -1,0 +1,19 @@
+dist: trusty
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+git:
+  depth: false
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_script:
+  - cp .travis.settings.xml ${HOME}/.m2/settings.xml
+
+script:
+  - mvn clean install

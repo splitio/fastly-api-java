@@ -10,7 +10,6 @@ import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.Response;
 
-import java.io.Closeable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
