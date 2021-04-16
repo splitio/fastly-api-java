@@ -1,5 +1,6 @@
 package io.split.fastly.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
@@ -9,9 +10,11 @@ import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.Response;
 
+import java.io.Closeable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Future;
 
 import static io.split.fastly.client.FastlyApiClient.Method.POST;
@@ -28,13 +31,15 @@ import static java.util.stream.Collectors.toList;
  */
 public class FastlyApiClient {
 
-    private final static String FASTLY_URL = "https://api.fastly.com";
+    /* package private */ final static String FASTLY_URL = "https://api.fastly.com";
+    /* package private */ final static Joiner SURROGATE_KEY_JOINER = Joiner.on(" ");
+
     private final Map<String, String> _commonHeaders;
     private final AsyncHttpClientConfig _config;
     private final AsyncHttpExecutor _asyncHttpExecutor;
     private final String _serviceId;
     private final String _apiKey;
-    private final Joiner SURROGATE_KEY_JOINER = Joiner.on(" ");
+
 
 
     public FastlyApiClient(final String apiKey, final String serviceId) {
@@ -42,6 +47,12 @@ public class FastlyApiClient {
     }
 
     public FastlyApiClient(final String apiKey, final String serviceId, AsyncHttpClientConfig config) {
+        this(apiKey, serviceId, config, null);
+    }
+
+    /* package private */
+    @VisibleForTesting
+    FastlyApiClient(final String apiKey, final String serviceId, AsyncHttpClientConfig config, AsyncHttpExecutor executor) {
 
         _commonHeaders = ImmutableMap.of(
                 "Fastly-Key", apiKey,
@@ -50,7 +61,7 @@ public class FastlyApiClient {
         _config = config;
         _apiKey = apiKey;
         _serviceId = serviceId;
-        _asyncHttpExecutor = new AsyncHttpExecutor();
+        _asyncHttpExecutor = (Objects.isNull(executor)) ? new AsyncHttpExecutorImpl() : executor;
     }
 
     public Future<Response> vclUpload(int version, String vcl, String id, String name) {
@@ -122,7 +133,7 @@ public class FastlyApiClient {
         return purgeKey(key, buildHeaderForSoftPurge(extraHeaders));
     }
 
-    public Future<Response> softPurgeKeys(List<String> keys) {
+    public Future<Response> purgeKeys(List<String> keys, Map<String, String> extraHeaders) {
         Preconditions.checkNotNull(keys, "keys cannot be null!");
         Preconditions.checkArgument(keys.size() <= 256, "Fastly can't purge batches of more than 256 keys");
 
@@ -132,9 +143,14 @@ public class FastlyApiClient {
                 POST,
                 ImmutableMap.<String, String> builder()
                         .putAll(_commonHeaders)
+                        .putAll(extraHeaders)
                         .put("Surrogate-Key", SURROGATE_KEY_JOINER.join(keys))
                         .build(),
                 Collections.EMPTY_MAP);
+    }
+
+    public Future<Response> softPurgeKeys(List<String> keys) {
+        return purgeKeys(keys, buildHeaderForSoftPurge(Collections.EMPTY_MAP));
     }
 
     public Future<Response> softPurgeKey(String key) {
@@ -179,14 +195,22 @@ public class FastlyApiClient {
         }
     }
 
+
+    /* package private */
+    @VisibleForTesting
+    interface AsyncHttpExecutor {
+         Future<Response> execute( String apiUrl,Method method, Map<String, String> headers, Map<String, String> parameters);
+        public void close();
+    }
+
     /**
      * Entity Responsible for executing the requesting against the remote endpoint.
      */
-    private class AsyncHttpExecutor {
+    private class AsyncHttpExecutorImpl implements AsyncHttpExecutor {
 
         private ExtendedAsyncHttpClient client;
 
-        public AsyncHttpExecutor() {
+        public AsyncHttpExecutorImpl() {
             client = _config != null ? new ExtendedAsyncHttpClient(_config) : new ExtendedAsyncHttpClient(defaultConfig);
         }
 

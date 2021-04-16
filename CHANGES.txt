@@ -1,5 +1,7 @@
 Changelog
 ---------
+1.2.1
+ Added `Fastly-Soft-Purge` header, which was missing in `softPurgeKeys` method
 
 1.2
  Include softPurgeKeys to allow batch call to purge by multiple surrogate keys.
