@@ -1,8 +1,9 @@
-package io.split;
+package io.split.fastly.client;
 
 import com.google.common.collect.Lists;
 import com.ning.http.client.Response;
-import io.split.fastly.client.FastlyApiClient;
+import io.split.BaseFastlyTest;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,7 +13,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public class FastlyApiClientTest extends BaseFastlyTest {
+// Remove Ignore if you are setting the keys.properties to try this against Fastly. Not including api keys since this is a public repo.
+@Ignore
+public class FastlyApiClientIntegrationTest extends BaseFastlyTest {
 
     @Test
     public void testPurgeAll() throws ExecutionException, InterruptedException, IOException {
@@ -74,5 +77,4 @@ public class FastlyApiClientTest extends BaseFastlyTest {
 
         printResult(res);
     }
-
 }

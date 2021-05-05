@@ -1,0 +1,24 @@
+dist: trusty
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+git:
+  depth: false
+
+cache:
+  directories:
+    - $HOME/.m2
+
+jobs:
+  include:
+    - stage: build
+      install: true
+      script:
+        - mvn --batch-mode -T 1C -U install -Dgpg.skip
+
+stages:
+  - name: build
+    if: (type = pull_request) OR (branch = master)
