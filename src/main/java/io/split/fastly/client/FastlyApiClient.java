@@ -131,7 +131,7 @@ public class FastlyApiClient {
                 apiUrl,
                 POST,
                 ImmutableMap.<String, String> builder()
-                        .putAll(_commonHeaders)
+                        .putAll(buildHeaderForSoftPurge(_commonHeaders))
                         .put("Surrogate-Key", SURROGATE_KEY_JOINER.join(keys))
                         .build(),
                 Collections.EMPTY_MAP);
