@@ -1,77 +1,86 @@
 package io.split.fastly.client;
 
-import com.google.common.collect.Lists;
-import com.ning.http.client.Response;
-import io.split.BaseFastlyTest;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-public class FastlyApiClientTest extends BaseFastlyTest {
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
-    @Test
-    public void testPurgeAll() throws ExecutionException, InterruptedException, IOException {
-        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+@RunWith(MockitoJUnitRunner.class)
+public class FastlyApiClientTest {
 
-        purgeAll(client);
+    public static final String API_KEY = "someApikey";
+    public static final String SERVICE_ID = "someServiceId";
+    public static final List<String> SURROGATE_KEYS = Arrays.asList("key1", "key2");
 
-        Future<Response> future = client.softPurgeKey("1446076111485");
-        Response res = future.get();
+    @Mock
+    private FastlyApiClient.AsyncHttpExecutor executor;
 
-        printResult(res);
-    }
+    @Captor
+    private ArgumentCaptor<Map<String, String>> headersCaptor;
 
-    private void purgeAll(FastlyApiClient client) throws InterruptedException, ExecutionException, IOException {
-        Future<Response> future;
-        Response res;
-        future = client.purgeAll();
-        res = future.get();
-        printResult(res);
-    }
+    @Captor
+    private ArgumentCaptor<Map<String, String>> parametersCaptor;
 
-    private void printResult(Response res) throws IOException {
-        System.out.println(res.getStatusCode());
-        System.out.println(res.getStatusText());
-        System.out.println(res.getResponseBody());
-    }
+    @Captor
+    private ArgumentCaptor<String> urlCaptor;
 
-    @Test
-    public void testPurgeMultipleKeys() throws ExecutionException, InterruptedException, IOException {
-        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+    @Captor
+    private ArgumentCaptor<FastlyApiClient.Method> methodCaptor;
 
-        Future<Response> future = client.softPurgeKeys(Lists.newArrayList("a", "b", "c", "d"));
-        Response res = future.get();
+    private FastlyApiClient fastlyApiClient;
 
-        printResult(res);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPurgeMoreThan256Keys() throws ExecutionException, InterruptedException, IOException {
-        List<String> keys = new Random().ints(257,0,10000)
-                .boxed()
-                .map(i -> Integer.toString(i))
-                .collect(Collectors.toList());
-
-        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
-
-        Future<Response> future = client.softPurgeKeys(keys);
-        Response res = future.get();
-
-        printResult(res);
+    @Before
+    public void init() {
+        fastlyApiClient = new FastlyApiClient(API_KEY, SERVICE_ID, null, executor);
+        when(executor.execute(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
     }
 
     @Test
-    public void testPurgeKey() throws ExecutionException, InterruptedException, IOException {
-        FastlyApiClient client = new FastlyApiClient(_fastly_api_key, _fastly_service_id, null);
+    public void testPurgeKeys() {
+        fastlyApiClient.purgeKeys(SURROGATE_KEYS);
 
-        Future<Response> future = client.softPurgeKey("a");
-        Response res = future.get();
+        Mockito.verify(executor).execute(urlCaptor.capture(), methodCaptor.capture(), headersCaptor.capture(),
+                parametersCaptor.capture());
 
-        printResult(res);
+        assertThat(urlCaptor.getValue(), is(String.format("%s/service/%s/purge", FastlyApiClient.FASTLY_URL, SERVICE_ID)));
+        assertThat(methodCaptor.getValue(), is(FastlyApiClient.Method.POST));
+
+        Map<String, String> headers = headersCaptor.getValue();
+        assertThat(headers.get("Fastly-Key"), is(API_KEY));
+        assertThat(headers.get("Accept"), is("application/json"));
+        assertThat(headers.get("User-Agent"), is("fastly-api-java-v" + VersionResolver.instance().getVersion()));
+        assertThat(headers.get("Surrogate-Key"), is(FastlyApiClient.SURROGATE_KEY_JOINER.join(SURROGATE_KEYS)));
+        assertThat(headers.get("Fastly-Soft-Purge"), is(nullValue()));
+    }
+
+    @Test
+    public void testSoftPurgeKeys() {
+        fastlyApiClient.softPurgeKeys(SURROGATE_KEYS);
+
+        Mockito.verify(executor).execute(urlCaptor.capture(), methodCaptor.capture(), headersCaptor.capture(),
+                parametersCaptor.capture());
+
+        assertThat(urlCaptor.getValue(), is(String.format("%s/service/%s/purge", FastlyApiClient.FASTLY_URL, SERVICE_ID)));
+        assertThat(methodCaptor.getValue(), is(FastlyApiClient.Method.POST));
+
+        Map<String, String> headers = headersCaptor.getValue();
+        assertThat(headers.get("Fastly-Key"), is(API_KEY));
+        assertThat(headers.get("Accept"), is("application/json"));
+        assertThat(headers.get("User-Agent"), is("fastly-api-java-v" + VersionResolver.instance().getVersion()));
+        assertThat(headers.get("Surrogate-Key"), is(FastlyApiClient.SURROGATE_KEY_JOINER.join(SURROGATE_KEYS)));
+        assertThat(headers.get("Fastly-Soft-Purge"), is("1"));
     }
 }

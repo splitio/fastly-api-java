@@ -16,7 +16,7 @@ Java API Wrapper for Fastly (https://docs.fastly.com/api)
 
 ```export GPG_TTY=$(tty) && mvn clean install```
 
-# Run tests
+# Run Integration tests
 
 Create a file under src/test/resources called: keys.properties containing:
 
@@ -25,6 +25,7 @@ fastly.api.key=<YOUR_FASTLY_API_KEY>
 fastly.service.id=<YOUR_FASTLY_SERVICE_KEY>
 ```
 
+And remove the Ignore annotation from the FastlyApiClientIntegrationTest.
 
 # how to deploy a version of this library?
 
