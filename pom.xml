@@ -4,7 +4,7 @@
 
   <groupId>io.split</groupId>
   <artifactId>fastly-api-java</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <packaging>jar</packaging>
 
   <name>fastly-api-java</name>
