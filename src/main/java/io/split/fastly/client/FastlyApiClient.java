@@ -59,7 +59,11 @@ public class FastlyApiClient {
     }
 
     public Future<Response> vclUpload(int version, String vcl, String id, String name) {
-        String apiUrl = String.format("%s/service/%s/version/%d/vcl", FASTLY_URL, _serviceId, version);
+        return vclUpload(version, vcl, id, name, FASTLY_URL);
+    }
+
+    public Future<Response> vclUpload(int version, String vcl, String id, String name, String fastlyUrl) {
+        String apiUrl = String.format("%s/service/%s/version/%d/vcl", fastlyUrl, _serviceId, version);
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
@@ -71,8 +75,12 @@ public class FastlyApiClient {
     }
 
     public List<Future<Response>> vclUpdate(int version, Map<String, String> vcl) {
+        return vclUpdate(version, vcl, FASTLY_URL);
+    }
+
+    public List<Future<Response>> vclUpdate(int version, Map<String, String> vcl, String fastlyUrl) {
         return vcl.entrySet().stream().map( e -> {
-            String apiUrl = String.format("%s/service/%s/version/$d/vcl/%s", FASTLY_URL, _serviceId, version, e.getKey());
+            String apiUrl = String.format("%s/service/%s/version/$d/vcl/%s", fastlyUrl, _serviceId, version, e.getKey());
             return _asyncHttpExecutor.execute(
                     apiUrl,
                     PUT,
@@ -118,7 +126,11 @@ public class FastlyApiClient {
     }
 
     public Future<Response> purgeKey(String key, Map<String, String> extraHeaders) {
-        String apiUrl = String.format("%s/service/%s/purge/%s", FASTLY_URL, _serviceId, key);
+        return purgeKey(key, extraHeaders, FASTLY_URL);
+    }
+
+    public Future<Response> purgeKey(String key, Map<String, String> extraHeaders, String fastlyUrl) {
+        String apiUrl = String.format("%s/service/%s/purge/%s", fastlyUrl, _serviceId, key);
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
@@ -130,18 +142,30 @@ public class FastlyApiClient {
     }
 
     public Future<Response> purgeKeys(List<String> keys) {
-        return purgeKeys(keys, Collections.emptyMap());
+        return purgeKeys(keys, FASTLY_URL);
+    }
+
+    public Future<Response> purgeKeys(List<String> keys, String fastlyUrl) {
+        return purgeKeys(keys, Collections.emptyMap(), fastlyUrl);
     }
 
     public Future<Response> softPurgeKeys(List<String> keys) {
-        return purgeKeys(keys, buildHeaderForSoftPurge(Collections.emptyMap()));
+        return softPurgeKeys(keys, FASTLY_URL);
+    }
+
+    public Future<Response> softPurgeKeys(List<String> keys, String fastlyUrl) {
+        return purgeKeys(keys, buildHeaderForSoftPurge(Collections.emptyMap()), fastlyUrl);
     }
 
     public Future<Response> purgeKeys(List<String> keys, Map<String, String> extraHeaders) {
+        return purgeKeys(keys, extraHeaders, FASTLY_URL);
+    }
+
+    public Future<Response> purgeKeys(List<String> keys, Map<String, String> extraHeaders, String fastlyUrl) {
         Preconditions.checkNotNull(keys, "keys cannot be null!");
         Preconditions.checkArgument(keys.size() <= 256, "Fastly can't purge batches of more than 256 keys");
 
-        String apiUrl = String.format("%s/service/%s/purge", FASTLY_URL, _serviceId);
+        String apiUrl = String.format("%s/service/%s/purge", fastlyUrl, _serviceId);
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,
@@ -154,7 +178,11 @@ public class FastlyApiClient {
     }
 
     public Future<Response>  purgeAll() {
-        String apiUrl = String.format("%s/service/%s/purge_all", FASTLY_URL, _serviceId);
+        return purgeAll(FASTLY_URL);
+    }
+
+    public Future<Response>  purgeAll(String fastlyURL) {
+        String apiUrl = String.format("%s/service/%s/purge_all", fastlyURL, _serviceId);
         return _asyncHttpExecutor.execute(
                 apiUrl,
                 POST,

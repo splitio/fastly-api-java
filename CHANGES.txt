@@ -1,5 +1,8 @@
 Changelog
 ---------
+1.2.2
+ Added `fastlyUrl` as an optional parameter to all methods, allowing callers to choose specific urls to hit. All methods default to `https://api.fastly.com`
+
 1.2.1
  Added `Fastly-Soft-Purge` header, which was missing in `softPurgeKeys` method
 
