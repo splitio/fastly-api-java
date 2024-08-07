@@ -1,8 +1,8 @@
 package io.split.fastly.client;
 
 import com.google.common.collect.Lists;
-import com.ning.http.client.Response;
 import io.split.BaseFastlyTest;
+import org.asynchttpclient.Response;
 import org.junit.Ignore;
 import org.junit.Test;
 
