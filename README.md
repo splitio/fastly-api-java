@@ -1,6 +1,12 @@
 # fastly-api-java
 Java API Wrapper for Fastly (https://docs.fastly.com/api)
 
+> 🚨 **This Library is Deprecated**
+>
+> Please use the [Platform Library](https://github.com/splitio/platform-libs/fastly-api-java) instead.
+>
+> Proceed with caution—here be dragons!
+
 # Add snapshot repo to your maven pom.xml
 
 ```xml
